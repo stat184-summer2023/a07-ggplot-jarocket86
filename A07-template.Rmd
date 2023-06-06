@@ -1,7 +1,7 @@
 ---
 title: "A07- ggplot"
-author: "YOUR NAME"
-date: "DATE"
+author: "Jared Hayes "
+date: "June 9th 2023"
 output: html_notebook
 ---
 
@@ -69,8 +69,13 @@ When you make your plot, you will likely find that the axis range is being set b
 
 ```{r}
 ### Your code here
+Trips <- Trips %>%
+  mutate(duration = as.numeric(edate - sdate))
 
-
+ggplot(Trips, aes(x = client, y = duration)) +
+  geom_boxplot() +
+  scale_y_continuous(limits = c(0, quantile(Trips$duration, 0.95))) +
+  labs(x = "Client Type", y = "Duration")
 ```
 
 
@@ -102,8 +107,9 @@ You can use [Figure 18.3](https://dtkaplan.github.io/DataComputingEbook/project-
 ### Day of Year
 
 ```{r}
-### Your Code Here
-
+ggplot(Trips, aes(x = as.Date(sdate))) +
+  geom_histogram(binwidth = 1, fill = "lightblue", color = "black") +
+  labs(x = "Date", y = "Count")
 ```
 
 
@@ -113,7 +119,9 @@ My observations here.....
 ### Day of Week
 
 ```{r}
-### Your Code Here
+ggplot(Trips, aes(x = format(sdate, "%A"))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(x = "Day of the Week", y = "Count")
 
 ```
 
@@ -125,8 +133,9 @@ My observations here.....
 ### Hour of Day
 
 ```{r}
-### Your Code Here
-
+ggplot(Trips, aes(x = format(sdate, "%H"))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(x = "Hour of the Day", y = "Count")
 ```
 
 
@@ -137,8 +146,10 @@ My observations here.....
 ### Minute of Hour
 
 ```{r}
-### Your Code Here
-
+ggplot(Trips, aes(x = format(sdate, "%M"))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(x = NULL, y = "Count") +
+  theme(axis.text.x = element_blank())
 ```
 
 
@@ -151,7 +162,17 @@ Group the bike rentals by three variables: hour of the day, day of the week, and
 
 ```{r}
 ### My Code here
+grouped <- Trips %>%
+  group_by(hour = format(sdate, "%H"), wday = format(sdate, "%w"), client) %>%
+  summarise(count = n())
 
+grouped
+
+ggplot(grouped, aes(x = hour, y = count, group = client)) +
+  geom_line() +
+  facet_wrap(~ wday, nrow = 1) +
+  labs(x = NULL, y = "Count") +
+  theme(axis.text.x = element_blank())
 ```
 
 My comments here.....
