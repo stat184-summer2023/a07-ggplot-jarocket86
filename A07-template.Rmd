@@ -21,6 +21,9 @@ You can access the data from the Capital Bikeshare web site. Doing this requires
 
 ```{r}
 library(tidyverse)
+library(ggplot2)
+library(dplyr)
+
 
 station_url <- "https://mdbeckman.github.io/dcSupplement/data/DC-Stations.csv"
 Stations <- readr::read_csv(station_url)
@@ -115,6 +118,8 @@ ggplot(Trips, aes(x = as.Date(sdate))) +
 
 My observations here..... 
 
+Less people used the bikes as it got colder outside. As well, less people used the bikes on Christimas and Thanksgiving. It appears that there are certain days of the week where people use the bikes less. 
+
 
 ### Day of Week
 
@@ -128,6 +133,8 @@ ggplot(Trips, aes(x = format(sdate, "%A"))) +
 
 My observations here..... 
 
+Less people use bikes on the weekend while there is a consistent amount of people who use bikes throughout the week. 
+
 
 
 ### Hour of Day
@@ -140,6 +147,7 @@ ggplot(Trips, aes(x = format(sdate, "%H"))) +
 
 
 My observations here..... 
+People don't use the bikes between midnight and 5 am. People use the bikes the most to get to work at 7-8 and they use them to get home between 4-6. People use bikes consistently between 9-3. After 6 usage of bikes decreases every hour. 
 
 
 
@@ -155,6 +163,8 @@ ggplot(Trips, aes(x = format(sdate, "%M"))) +
 
 My observations here..... 
 
+There does not appear to be any relation between minute of the hour and number of bikes used. 
+
 
 ## Question 3: Grouping
 
@@ -168,7 +178,7 @@ grouped <- Trips %>%
 
 grouped
 
-ggplot(grouped, aes(x = hour, y = count, group = client)) +
+ggplot(grouped, aes(x = hour, y = count, group = client,color=client)) +
   geom_line() +
   facet_wrap(~ wday, nrow = 1) +
   labs(x = NULL, y = "Count") +
@@ -177,6 +187,7 @@ ggplot(grouped, aes(x = hour, y = count, group = client)) +
 
 My comments here.....
 
+Casual riders use the bikes the most on the weekends. Registered riders use bikes to get to work and to get home during the week. They use them during the day for the weekends but they are used way less than they are during the week. Casual riders using them during the day during the week. 
 
 ## Question 4: How Far? 
 
@@ -200,6 +211,10 @@ Simple <-
 Simple2 <-
   Simple %>%
   rename(estation = sstation, lat2 = lat, long2 = long)
+
+head(Simple)
+
+head(Simple2)
 
 ```
 
@@ -235,10 +250,19 @@ Our goal here is to recreate [Figure 18.5](https://dtkaplan.github.io/DataComput
 
 ```{r}
 ### My code here
-
+ 
+TripsWithDistances <- inner_join(Trips, PairDistances, by = c("sstation", "estation"))
+p <- ggplot() +
+  geom_density(data = PairDistances, aes(x = distance, color = "Distance between Stations"), fill = "lightblue", alpha = 0.5) +
+  geom_density(data = TripsWithDistances, aes(x = distance, color = "Ride Distance"), fill = NA) +
+  labs(x = "Distance", y = "Density") +
+  scale_color_manual(values = c("Ride Distance" = "black", "Distance between Stations" = NA)) +
+  theme(legend.title = element_blank()) +
+  guides(color = guide_legend(reverse = TRUE))+xlim(0,15)
+p
 ```
 
-
+There seems to be little relation between ride distance and distance between stations. Ride distance probability increases sharply from 0 to 1 miles and then decreases sharply from 1 to 5 miles. Meanwhile, distance between stations probability increases slowly from 1 to 5 miles then decreases slowly from 5 to 15. As probability of finding another station increased the probability of a ride being that distance increased. However, as probability of distance between stations continued to increase ride distance probability decreased to basically 0. 
 
 
 #### Extra Credit: Joining and Variable Names in R
